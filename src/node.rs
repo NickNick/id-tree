@@ -75,7 +75,7 @@ impl<T> NodeBuilder<T> {
 ///
 /// A container that wraps data in a given `Tree`.
 ///
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
 pub struct Node<T> {
     pub(crate) data: T,
@@ -258,7 +258,7 @@ mod node_builder_tests {
 
 #[cfg(test)]
 mod node_tests {
-    use super::super::snowflake::ProcessUniqueId;
+    
     use super::super::NodeId;
     use super::Node;
 
@@ -288,7 +288,6 @@ mod node_tests {
         assert!(node.parent().is_none());
 
         let parent_id: NodeId = NodeId {
-            tree_id: ProcessUniqueId::new(),
             index: 0,
         };
 
@@ -304,7 +303,6 @@ mod node_tests {
         assert_eq!(node.children().len(), 0);
 
         let child_id: NodeId = NodeId {
-            tree_id: ProcessUniqueId::new(),
             index: 0,
         };
         node.add_child(child_id.clone());
@@ -316,7 +314,6 @@ mod node_tests {
         assert_eq!(node.children().len(), 0);
 
         let child_id: NodeId = NodeId {
-            tree_id: ProcessUniqueId::new(),
             index: 0,
         };
         node.children_mut().push(child_id.clone());

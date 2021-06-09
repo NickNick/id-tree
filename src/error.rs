@@ -6,8 +6,6 @@ use std::fmt;
 ///
 #[derive(Debug, Eq, PartialEq)]
 pub enum NodeIdError {
-    /// Occurs when a `NodeId` is used on a `Tree` from which it did not originate.
-    InvalidNodeIdForTree,
     /// Occurs when a `NodeId` is used on a `Tree` after the corresponding `Node` has been removed.
     NodeIdNoLongerValid,
 }
@@ -15,7 +13,6 @@ pub enum NodeIdError {
 impl NodeIdError {
     fn to_string(&self) -> &str {
         match *self {
-            NodeIdError::InvalidNodeIdForTree => "The given NodeId belongs to a different Tree.",
             NodeIdError::NodeIdNoLongerValid => {
                 "The given NodeId is no longer valid. The Node in question has been \
                  removed."

@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 
-use super::snowflake::ProcessUniqueId;
+
 use super::*;
 
 ///
@@ -119,10 +119,7 @@ impl<T> TreeBuilder<T> {
     /// ```
     ///
     pub fn build(mut self) -> Tree<T> {
-        let tree_id = ProcessUniqueId::new();
-
         let mut tree = Tree {
-            id: tree_id,
             root: None,
             nodes: Vec::with_capacity(self.node_capacity),
             free_ids: Vec::with_capacity(self.swap_capacity),
@@ -130,7 +127,6 @@ impl<T> TreeBuilder<T> {
 
         if self.root.is_some() {
             let node_id = NodeId {
-                tree_id: tree_id,
                 index: 0,
             };
 
@@ -153,10 +149,9 @@ impl<T> TreeBuilder<T> {
 /// **If this ever happens please report the issue.** `Panic`s are not expected behavior for this
 /// library, but they can happen due to bugs.
 ///
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
 pub struct Tree<T> {
-    id: ProcessUniqueId,
     root: Option<NodeId>,
     pub(crate) nodes: Vec<Option<Node<T>>>,
     free_ids: Vec<NodeId>,
@@ -1559,10 +1554,6 @@ impl<T> Tree<T> {
     // Nothing should make it past this function.
     // If there is a way for a NodeId to be invalid, it should be caught here.
     fn is_valid_node_id(&self, node_id: &NodeId) -> (bool, Option<NodeIdError>) {
-        if node_id.tree_id != self.id {
-            return (false, Some(NodeIdError::InvalidNodeIdForTree));
-        }
-
         if node_id.index >= self.nodes.len() {
             panic!(
                 "NodeId: {:?} is out of bounds. This is most likely a bug in id_tree. Please \
@@ -1667,7 +1658,6 @@ impl<T> Tree<T> {
 
     fn new_node_id(&self, node_index: usize) -> NodeId {
         NodeId {
-            tree_id: self.id,
             index: node_index,
         }
     }
@@ -1747,52 +1737,6 @@ where
         }
 
         true
-    }
-}
-
-impl<T> Clone for Tree<T>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Self {
-        let tree_id = ProcessUniqueId::new();
-
-        Tree {
-            id: tree_id,
-            root: self.root.as_ref().map(|x| NodeId {
-                tree_id,
-                index: x.index,
-            }),
-            nodes: self
-                .nodes
-                .iter()
-                .map(|x| {
-                    x.as_ref().map(|y| Node {
-                        data: y.data.clone(),
-                        parent: y.parent.as_ref().map(|z| NodeId {
-                            tree_id,
-                            index: z.index,
-                        }),
-                        children: y
-                            .children
-                            .iter()
-                            .map(|z| NodeId {
-                                tree_id,
-                                index: z.index,
-                            })
-                            .collect(),
-                    })
-                })
-                .collect(),
-            free_ids: self
-                .free_ids
-                .iter()
-                .map(|x| NodeId {
-                    tree_id,
-                    index: x.index,
-                })
-                .collect(),
-        }
     }
 }
 
@@ -3030,34 +2974,6 @@ mod tree_tests {
 
         let cloned = tree.clone();
         assert!(cloned.root.is_some());
-        let tree_id = cloned.id;
-
-        // ensure cloned tree has a new id
-        assert_ne!(tree.id, tree_id);
-
-        // ensure cloned tree's root is using the new tree id
-        assert_eq!(cloned.root.as_ref().map(|x| x.tree_id), Some(tree_id));
-
-        // ensure cloned tree's free_ids is using the new tree id
-        assert_eq!(cloned.free_ids[0].tree_id, tree_id);
-
-        // ensure nodes' parent are using the new tree id
-        assert_eq!(
-            cloned.nodes[1]
-                .as_ref()
-                .map(|x| x.parent.as_ref().map(|x| x.tree_id)),
-            Some(Some(tree_id))
-        );
-
-        // ensure nodes' children are using the new tree id
-        assert_eq!(
-            cloned
-                .children(cloned.root.as_ref().unwrap())
-                .unwrap()
-                .next()
-                .map(|x| x.parent.as_ref().map(|x| x.tree_id)),
-            Some(Some(tree_id))
-        );
 
         // ensure the tree and the cloned tree are equal
         assert_eq!(tree, cloned);
