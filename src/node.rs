@@ -75,7 +75,7 @@ impl<T> NodeBuilder<T> {
 ///
 /// A container that wraps data in a given `Tree`.
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash, Eq)]
 #[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
 pub struct Node<T> {
     pub(crate) data: T,
