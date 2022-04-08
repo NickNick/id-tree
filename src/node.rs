@@ -258,7 +258,7 @@ mod node_builder_tests {
 
 #[cfg(test)]
 mod node_tests {
-    
+
     use super::super::NodeId;
     use super::Node;
 
@@ -287,9 +287,7 @@ mod node_tests {
         let mut node = Node::new(5);
         assert!(node.parent().is_none());
 
-        let parent_id: NodeId = NodeId {
-            index: 0,
-        };
+        let parent_id: NodeId = NodeId { index: 0 };
 
         node.set_parent(Some(parent_id.clone()));
         assert!(node.parent().is_some());
@@ -302,9 +300,7 @@ mod node_tests {
         let mut node = Node::new(5);
         assert_eq!(node.children().len(), 0);
 
-        let child_id: NodeId = NodeId {
-            index: 0,
-        };
+        let child_id: NodeId = NodeId { index: 0 };
         node.add_child(child_id.clone());
 
         assert_eq!(node.children().len(), 1);
@@ -313,9 +309,7 @@ mod node_tests {
         let mut node = Node::new(5);
         assert_eq!(node.children().len(), 0);
 
-        let child_id: NodeId = NodeId {
-            index: 0,
-        };
+        let child_id: NodeId = NodeId { index: 0 };
         node.children_mut().push(child_id.clone());
 
         assert_eq!(node.children().len(), 1);

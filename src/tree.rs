@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 
-
 use super::*;
 
 ///
@@ -126,9 +125,7 @@ impl<T> TreeBuilder<T> {
         };
 
         if self.root.is_some() {
-            let node_id = NodeId {
-                index: 0,
-            };
+            let node_id = NodeId { index: 0 };
 
             tree.nodes.push(self.root.take());
             tree.root = Some(node_id);
@@ -1657,9 +1654,7 @@ impl<T> Tree<T> {
     }
 
     fn new_node_id(&self, node_index: usize) -> NodeId {
-        NodeId {
-            index: node_index,
-        }
+        NodeId { index: node_index }
     }
 
     fn clear_parent(&mut self, node_id: &NodeId) {
